@@ -7,6 +7,10 @@ Each stage is checked by running the script up to and including that stage, then
   tiny probe cubes      0.0002 mm: a probe counts as inside when at least half its volume overlaps the
                         result (inspect.clearance, with its minimum overlap set to 1e-18 mm^3). For a point
                         0.000005 mm from a surface, the overlap is 47.5% or 52.5%, so the answer is exact.
+Older releases (0.30.1) refuse a box as small as 0.0002 mm ("cannot attach a plane to a wire that is not
+on one plane"): the probe is then the smallest of 0.002 and 0.02 mm that the release builds, recorded as
+probe_mm with each result. The half-overlap test stays exact in principle at any size (on a flat face the
+overlap is 0.5 + d/h for a point d inside); it leans more on the kernel's volume for points very near a face.
 A stage that does not finish within --limit seconds (on top of the earlier stages' time) is a hang.
 
 SolidCraft's draft angle is signed (positive tilts the face inward) and relative to the face's own taper
@@ -391,6 +395,19 @@ def probes_for(test, stage):
     return cmds + ([C("inspect.clearance", against=names, min_volume=1e-18)] if names else [C("inspect.measure")])
 
 
+def probe_size(cli, tmp):
+    """The smallest probe cube this release builds."""
+    global PROBE
+    for size in (0.0002, 0.002, 0.02):
+        _, err, _ = run_cli(cli, [box(1, 1, 1, corner=[0, 0, 0], body_name="Part"),
+                                  box(size, size, size, center=[0.5, 0.5, 0.5], body_name="probe"),
+                                  C("inspect.clearance", against=["probe"], min_volume=1e-18)], 120, tmp)
+        if not err:
+            PROBE = size
+            return size
+    raise RuntimeError("this release builds no probe cube up to 0.02 mm")
+
+
 def run_test(cli, test, version, out, limit, tmp):
     stages = BUILDERS[test]()
     so_far, prev_v, spent = [], None, 0.0
@@ -402,6 +419,8 @@ def run_test(cli, test, version, out, limit, tmp):
         cmds = so_far + stage_cmds
         res, err, secs = run_cli(cli, cmds + [C("inspect.measure")] + probes_for(test, n), limit + spent * 2 + 60, tmp)
         rec = {"pipeline": "solidcraft", "version": version, "test": test, "stage": n}
+        if PROBE != 0.0002:
+            rec["probe_mm"] = PROBE
         if err == "timeout":
             rec.update(outcome="hang", seconds=limit, detail="no result within %d s" % limit)
         elif err:
@@ -442,6 +461,7 @@ def main(argv):
     out = os.path.abspath(out or os.path.join(ROOT, "results", "solidcraft-%s.jsonl" % ver))
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
+        print("probe cube: %g mm" % probe_size(cli, tmp), flush=True)
         for t in args or list(BUILDERS):
             run_test(cli, t, version, out, limit, tmp)
     print("results:", out)
