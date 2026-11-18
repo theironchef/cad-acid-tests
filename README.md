@@ -2,12 +2,15 @@
 
 Ten deliberately hard parts and assemblies for checking how well a CAD kernel copes. Each test packs together the kinds of geometry that broke most often in the 10,000-item [stress corpus](https://github.com/dutchman-cad/stress-corpus): features one tolerance from a seam, rounds on spline outlines, shells thicker than a nearby feature, equal crossing holes, extreme size ratios, parts far from the origin, and patterns that cross their own edges.
 
-The tests are run on:
+This is a comparison: how well does each CAD program build the same hard models? The tests are run on:
 
 - **SolidCraft:** every minor release from 0.20.0 to 0.44.0, plus 0.44.1, as a baseline. After that, every new release.
 - **FreeCAD:** run as a separate program through its public Python API.
+- **Fusion:** built from [PLAN.md](PLAN.md), with the version recorded. Other programs can be added the same way.
 
-Commercial CAD is not used. No test, script or expected value comes from Fusion, SolidWorks, Onshape or any other commercial product.
+Every program is held to the same standard:
+- **Expected values:** they are worked out by hand from the dimensions. None comes from any CAD program's output, so no program is graded against another.
+- **Results:** they record only the outcome, timing, volume, body count and probe answers. No design files or exports from any program are committed.
 
 ## How a test is scored
 
