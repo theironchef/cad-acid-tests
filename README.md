@@ -12,28 +12,31 @@ Every program is held to the same standard:
 - **Expected values:** they are worked out by hand from the dimensions. None comes from any CAD program's output, so no program is graded against another.
 - **Results:** they record only the outcome, timing, volume, body count and probe answers. No design files or exports from any program are committed.
 
-## How a test is scored
+## Results
 
-A test is a numbered list of **stages**, each building on the one before. A stage passes when the result:
+The results table, with each test's reasoning, is at **https://theironchef.github.io/cad-acid-tests/**. It is also in [SCOREBOARD.md](SCOREBOARD.md).
 
-1. builds, without an error or a timeout (the default limit is 300 s per stage);
-2. is a valid closed solid, or the stated number of them;
-3. matches the expected values: body count always, and volume or face count where the test gives them.
+A test is a numbered list of stages, each building on the one before. A program's score is the number of stages that pass before the first that does not. A stage passes when it:
+- builds within 300 s;
+- leaves valid closed solids, in the stated number;
+- answers its probe points right;
+- matches the volume, where there is one.
 
-Every expected value is worked out by hand from the dimensions, as a closed form, or as a bound where an exact value would need a round's corner patch. The working is in `expected/`, and none of it comes from running a CAD program.
-
-A pipeline's score on a test is the number of stages that pass before the first failure. For example, "7 / 12" means stages 1–7 passed and stage 8 did not. A later stage is never credited after an earlier one fails.
+The details are in [PLAN.md](PLAN.md).
 
 ## Layout
 
-- `TESTS.md`: the ten tests in words, with every dimension. This is the reference.
-- `expected/`: the expected values for each stage, with their working.
-- `solidcraft/`: a `solidcraft-cli` command script per test and stage.
-- `freecad/`: a FreeCAD Python script per test.
-- `results/`: one JSON line per pipeline, version, test and stage.
-- `tools/`: the runners and the scoreboard.
-- `.github/workflows/`: runs every SolidCraft release, and the FreeCAD baseline, on GitHub's runners.
+- [`TESTS.md`](TESTS.md): the ten tests, acid-1 to acid-10, with why each exists, what it stresses in a kernel, and every dimension.
+- [`PLAN.md`](PLAN.md): conventions, checks, and how each program is run.
+- [`expected/values.py`](expected/values.py): the expected values and probe points for every stage.
+- `freecad/`, `solidcraft/`: one harness per program.
+- `results/`: one JSON line per program, version, test and stage.
+- `tools/`: `run_freecad.py`, and `site.py`, which writes the scoreboard and the site in `docs/`.
 
-## Status
+## Running
 
-Draft: the tests are being written. Scripts, expected values and runners come next.
+```
+python tools/run_freecad.py <path to freecadcmd>
+python solidcraft/acid.py <path to solidcraft-cli>
+python tools/site.py
+```
