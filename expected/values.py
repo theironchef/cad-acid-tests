@@ -21,7 +21,7 @@ python expected/values.py --poles   prints acid-2's outline as Bezier segments (
 """
 import math
 import sys
-from math import pi, sqrt, tan, radians, cos, sin, atan2
+from math import acos, atan2, cos, pi, radians, sin, sqrt, tan
 
 EXACT_REL = 1e-5
 DELTA_SLACK_REL = 1e-6
@@ -254,12 +254,22 @@ _cone = pi * 200 / 3 * (100 ** 2 + 100 * 40 + 40 ** 2)
 _T18 = tan(radians(18))
 _R7 = lambda z: 100 - z * _T18  # the drafted side's radius at height z
 _drafted = gauss_legendre(lambda z: pi * _R7(z) ** 2, 0, 200)     - 6 * gauss_legendre(lambda z: circles_overlap(_R7(z), 5, 32), 150, 200)
+# The R 0.5 round on the top face's outer loop: the rim arcs (the top meets the side at 108 degrees)
+# and the six hole arcs inside the rim (the top meets the hole walls at 90 degrees). A round on a
+# straight edge of interior angle a removes r**2 * (cot(a/2) - (pi - a)/2) per unit length: QR * r**2
+# at 90 degrees, less at 108. The window runs from every edge at the 90-degree rate (+10%) to every
+# edge at the 108-degree rate (-20%), which leaves room for the corner blends where the loop turns.
+_Rt = _R7(200)
+_rim7 = _Rt * (2 * pi - 12 * acos((32 ** 2 + _Rt ** 2 - 25) / (2 * 32 * _Rt)))
+_holes7 = 6 * 5 * (2 * pi - 2 * acos((_Rt ** 2 - 32 ** 2 - 25) / (2 * 32 * 5)))
+_r108 = 1 / tan(radians(54)) - (pi - radians(108)) / 2
 A7 = {
     1: dict(bodies=1, vol=("exact", _cone)),
     2: dict(bodies=1, vol=("exact", _cone - 6 * pi * 25 * 50), outside=[(32, 0, 190)]),
     3: dict(bodies=1, vol=("exact", _drafted), outside=[(36, 0, 195), (36, 0, 199)],
             inside=[(30, 10, 100), (35.5, 0, 140)]),
-    4: dict(bodies=1, vol=("delta", -0.5, -1e-5), outside=[(35.0, 4.95, 199.95)]),
+    4: dict(bodies=1, vol=("delta", -QR * 0.25 * (_rim7 + _holes7) * 1.1, -_r108 * 0.25 * (_rim7 + _holes7) * 0.8),
+            outside=[(35.0, 4.95, 199.95)]),
     5: dict(bodies=1, outside=[(0, 0, 40)]),
     6: dict(bodies=1, outside=[(0, 0, 150)], inside=[(0, 0, 199)]),
 }

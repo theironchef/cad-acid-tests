@@ -10,7 +10,8 @@ This is a comparison: how well does each CAD program build the same hard models?
 
 Every program is held to the same standard:
 - **Expected values:** they are worked out by hand from the dimensions. None comes from any CAD program's output, so no program is graded against another.
-- **Results:** they record only the outcome, timing, volume, body count and probe answers. No design files or exports from any program are committed.
+- **Results:** they record only the outcome, timing, volume, body count and probe answers.
+- **Models:** Fusion's builds are in [`fusion/models/`](fusion/models), as Fusion archives (`.f3d`) with their timelines, so each result can be opened and inspected. No other program's design files are committed.
 
 ## Results
 
