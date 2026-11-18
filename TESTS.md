@@ -13,7 +13,7 @@ Each test lists the stress-corpus families it combines, by the issue that descri
 *Families: features within 1e-5 of a torus seam (solidcraft#18274, #18308), slow rounds on torus edges (#18270), a shell wall against small features (#18239), and placement far from the origin.*
 
 1. Make a torus about the Z axis with a Ø60 centre circle and a Ø16 tube. Keep the half with Z ≥ 0, so the body has a flat annular face at Z = 0.
-2. On the flat face, add a Ø1.9 × 1.9 cylindrical boss pointing down (−Z). Centre it on the centre circle, 0.95001 along the circle toward +Y from the 0° seam (+X), so its side is 0.00001 clear of the seam.
+2. On the flat face, add a Ø1.9 × 1.9 cylindrical boss pointing down (−Z). Centre it on the centre circle at Y = 0.95001 (X > 0), so its side is 0.00001 clear of the 0° seam, which lies in the plane Y = 0.
 3. In the outer rim of the flat face, cut a Ø1.4 round notch 3 deep at 90° (on +Y), centred on the rim edge.
 4. Round both edge loops of the flat face (the inner and the outer circle) with R 0.8. The outer loop now runs around the notch.
 5. Shell the body inward to 0.6 walls, removing the boss's end face.
@@ -41,7 +41,7 @@ Each test lists the stress-corpus families it combines, by the issue that descri
 1. Make a 80 × 60 × 30 block with one corner at the origin.
 2. On the top face, add six square pads 3 × 3 × 2, in a 3 × 2 grid at 20 pitch starting at (20, 20).
 3. Cut a Ø6 hole 20 deep at the top face's centre, and give it a modelled M6 × 1 thread 15 long.
-4. Cut 8 Ø2.5 holes 10 deep in a circular pattern of radius 12 about that centre.
+4. Cut 8 Ø2.5 holes in a circular pattern of radius 12 about that centre, from Z = 32 down to Z = 20, so they also cut the pads they cross.
 5. Cut a Ø3 notch 4 deep centred on the top face's front edge, 1.50001 from the left end, so it is 0.00001 clear of the corner.
 6. Shell to 1.2 walls with no face removed, leaving a closed internal void.
 7. Round every edge of the top face's outer loop with R 0.5.
@@ -52,7 +52,7 @@ Each test lists the stress-corpus families it combines, by the issue that descri
 
 1. Make a 40 × 40 × 40 cube centred on the origin.
 2. Cut three Ø18 holes through it along X, Y and Z, all through the centre.
-3. Cut two Ø8 holes through it along X, at Y = ±10.00001 and Z = 0, and two along Y at X = ±10.00001 and Z = 0.
+3. Cut two Ø8 holes through it along X, at Y = ±10 and Z = 0, and two along Y, at X = ±10 and Z = 0.00001. Each Y hole crosses an X hole of the same diameter, with axes 0.00001 apart.
 4. Make a separate Ø10 cylinder along Z from Z = −30 to 30 at X = 26, which is 1 clear of the cube, and join to it a second one at X = 35.99999, so the two overlap by 0.00001.
 5. Join a Ø10 sphere centred at (26, 0, 34.99999), which dips 0.00001 into the first cylinder's top.
 6. Round the twelve edges of the cube with R 2. There are now two bodies.
