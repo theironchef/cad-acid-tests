@@ -12,7 +12,7 @@ import sys
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ALL = ["acid-%d" % i for i in range(1, 11)]
+ALL = ["acid-%d" % i for i in range(1, 12)]
 
 
 def version(fc):

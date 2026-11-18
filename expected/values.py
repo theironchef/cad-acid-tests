@@ -336,11 +336,23 @@ A10 = {
             inside=[(_F[0] + 25, _F[1] + 0.00002, 25), (_F[0] + 79, _F[1] + 25, 25)]),
 }
 
+# ------------------------------------------------------------------ acid-11 Orrery
+A11 = {
+    1: dict(bodies=1, inside=[(-40, 0, 11), (0, 0, 5)]),
+    2: dict(bodies=2, inside=[(-10, 0, 34), (-70, 0, 34)]),
+    3: dict(bodies=3, inside=[(15.5, 0, 33)], outside=[(13.5, 0, 33)]),
+    4: dict(),
+    5: dict(motion=dict(ratio=-3, steps=[10 * k for k in range(36)], tol_deg=1e-6)),
+    6: dict(interference="none"),
+}
+CAM_REACH = 0.25 * 60.01286919118682  # the outline's farthest point from its axis, scaled
+RIM_GAP = 53.5 - 38 - CAM_REACH
+
 TESTS = {"acid-1": A1, "acid-2": A2, "acid-3": A3, "acid-4": A4, "acid-5": A5,
-         "acid-6": A6, "acid-7": A7, "acid-8": A8, "acid-9": A9, "acid-10": A10}
+         "acid-6": A6, "acid-7": A7, "acid-8": A8, "acid-9": A9, "acid-10": A10, "acid-11": A11}
 NAMES = {"acid-1": "Seamstress", "acid-2": "Spline bracelet", "acid-3": "Hollow clockwork", "acid-4": "Crossfire",
          "acid-5": "Corner cascade", "acid-6": "Needle and planet", "acid-7": "Volcano", "acid-8": "Lattice drum",
-         "acid-9": "Twisted tower", "acid-10": "Near misses"}
+         "acid-9": "Twisted tower", "acid-10": "Near misses", "acid-11": "Orrery"}
 
 if __name__ == "__main__":
     if "--poles" in sys.argv:

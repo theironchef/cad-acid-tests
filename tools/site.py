@@ -168,10 +168,10 @@ def page(tests, runs):
             "".join(stops)))
     return """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>CAD Acid Tests</title>
-<meta name="description" content="Ten deliberately hard parts, scored stage by stage across CAD programs and releases.">
+<meta name="description" content="Eleven deliberately hard parts and assemblies, scored stage by stage across CAD programs and releases.">
 <style>%s</style></head><body><main>
 <h1>CAD acid tests</h1>
-<p class="lede">Ten deliberately hard parts, each built in stages and checked against values worked out by hand, never
+<p class="lede">Eleven deliberately hard parts and assemblies, each built in stages and checked against values worked out by hand, never
 taken from another CAD program. A score is the number of stages passed before the first one that fails.
 Each test is built from the kinds of geometry that broke most often in a 10,000-item
 <a href="https://github.com/dutchman-cad/stress-corpus">stress corpus</a>.</p>
@@ -187,7 +187,7 @@ answer at a few <em>probe points</em> that must be inside or outside the part. T
 feature which silently goes missing. Where a closed form exists, the volume must match too. Programs integrate
 volume numerically, so a volume gets 1e-5 relative tolerance. Spline solids get a &plusmn;0.5%% window instead,
 because some programs integrate their volume coarsely: FreeCAD 1.1.4's is 0.15%% low on the acid-2 outline.</p>
-<p>Every test uses only built-in solid-modelling operations: no sheet metal, assemblies, plug-ins or add-on workbenches.
+<p>Every test uses only built-in operations: solid modelling for acid-1 to acid-10, and the program's own assembly tools for acid-11 (in FreeCAD, its built-in Assembly workbench). There is no sheet metal, and nothing from a plug-in or an add-on.
 The construction, the picks and the expected values are in the
 <a href="https://github.com/theironchef/cad-acid-tests">repository</a>: <code>TESTS.md</code>, <code>PLAN.md</code> and
 <code>expected/values.py</code>.</p>

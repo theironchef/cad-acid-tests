@@ -1,6 +1,6 @@
 # CAD acid tests
 
-Ten deliberately hard parts and assemblies for checking how well a CAD kernel copes. Each test packs together the kinds of geometry that broke most often in the 10,000-item [stress corpus](https://github.com/dutchman-cad/stress-corpus): features one tolerance from a seam, rounds on spline outlines, shells thicker than a nearby feature, equal crossing holes, extreme size ratios, parts far from the origin, and patterns that cross their own edges.
+Eleven deliberately hard parts and assemblies for checking how well a CAD kernel copes: acid-1 to acid-10 are single parts, and acid-11 is an assembly. Each test packs together the kinds of geometry that broke most often in the 10,000-item [stress corpus](https://github.com/dutchman-cad/stress-corpus): features one tolerance from a seam, rounds on spline outlines, shells thicker than a nearby feature, equal crossing holes, extreme size ratios, parts far from the origin, and patterns that cross their own edges.
 
 This is a comparison: how well does each CAD program build the same hard models? The tests are run on:
 
@@ -26,7 +26,7 @@ The details are in [PLAN.md](PLAN.md).
 
 ## Layout
 
-- [`TESTS.md`](TESTS.md): the ten tests, acid-1 to acid-10, with why each exists, what it stresses in a kernel, and every dimension.
+- [`TESTS.md`](TESTS.md): the eleven tests, acid-1 to acid-11, with why each exists, what it stresses in a kernel, and every dimension.
 - [`PLAN.md`](PLAN.md): conventions, checks, and how each program is run.
 - [`expected/values.py`](expected/values.py): the expected values and probe points for every stage.
 - `freecad/`, `solidcraft/`: one harness per program.

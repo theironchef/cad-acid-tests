@@ -402,8 +402,144 @@ def acid10():
     ]
 
 
+def acid11():
+    """The orrery, with FreeCAD's built-in Assembly workbench: revolute joints, a Gears joint, and a
+    Simulation with an angular motion on the ring's joint, read back frame by frame."""
+    import builtins
+    import JointObject
+    import UtilsAssembly
+    try:
+        from PySide import QtCore, QtGui, QtWidgets
+    except ImportError:
+        from PySide6 import QtCore, QtGui, QtWidgets
+    # CommandCreateSimulation names Qt classes at import time, which it expects the GUI to provide
+    builtins.QtCore, builtins.QtGui, builtins.QtWidgets = QtCore, QtGui, QtWidgets
+    from CommandCreateSimulation import Motion, Simulation
+
+    st = {}
+
+    def build(fn, upto):
+        shape = None
+        for f in fn()[:upto]:
+            shape = f(shape)
+        return shape
+
+    def placed():
+        return Part.makeCompound([o.Shape for o in st["parts"]])
+
+    def circle(obj, centre, radius):
+        for i, e in enumerate(obj.Shape.Edges, 1):
+            c = e.Curve
+            if hasattr(c, "Radius") and abs(c.Radius - radius) < 1e-6 and (c.Center - V(*centre)).Length < 1e-6:
+                return "Edge%d" % i
+        raise RuntimeError("no circle of radius %g at %r" % (radius, centre))
+
+    def joint(kind, a, ea, b, eb, name):
+        j = st["joints"].newObject("App::FeaturePython", name)
+        JointObject.Joint(j, JointObject.JointTypes.index(kind))
+        j.Proxy.setJointConnectors(j, [[a, [ea, ea]], [b, [eb, eb]]])
+        return j
+
+    def zangle(obj):
+        v = obj.Placement.Rotation.multVec(V(1, 0, 0))
+        return math.degrees(math.atan2(v.y, v.x))
+
+    def s1(_):
+        doc = App.newDocument("orrery")
+        asm = doc.addObject("Assembly::AssemblyObject", "Assembly")
+        st.update(doc=doc, asm=asm, joints=asm.newObject("Assembly::JointGroup", "Joints"))
+        base = asm.newObject("Part::Feature", "Base")
+        base.Shape = Part.makeBox(160, 100, 10, V(-80, -50, 0)).fuse(
+            [Part.makeCylinder(3, 2, V(-40, 0, 10)), Part.makeCylinder(3, 2, V(13.5, 0, 10))])
+        g = st["joints"].newObject("App::FeaturePython", "Ground")
+        JointObject.GroundedJoint(g, base)
+        st.update(base=base, parts=[base])
+        return placed()
+
+    def s2(_):
+        ring = st["asm"].newObject("Part::Feature", "Ring")
+        ring.Shape = build(acid1, 3)
+        ring.Placement = App.Placement(V(-40, 0, 30), App.Rotation())
+        st["doc"].recompute()
+        j = joint("Revolute", st["base"], circle(st["base"], (-40, 0, 12), 3), ring, circle(ring, (-40, 0, 30), 22), "J1")
+        j.Offset1 = App.Placement(V(0, 0, 18), App.Rotation())
+        st.update(ring=ring, j1=j)
+        st["parts"].append(ring)
+        if st["asm"].solve() != 0:
+            raise RuntimeError("the assembly did not solve with the ring joint")
+        return placed()
+
+    def s3(_):
+        cam = st["asm"].newObject("Part::Feature", "Cam")
+        shape = build(acid2, 3)
+        shape.scale(0.25, V(0, 0, 0))  # a uniform scale keeps the analytic surfaces (transformGeometry would not)
+        cam.Shape = shape.cut(Part.makeCylinder(1, 50, V(0, 0, -10)))
+        cam.Placement = App.Placement(V(13.5, 0, 30), App.Rotation())
+        st["doc"].recompute()
+        j = joint("Revolute", st["base"], circle(st["base"], (13.5, 0, 12), 3), cam, circle(cam, (13.5, 0, 30), 1), "J2")
+        j.Offset1 = App.Placement(V(0, 0, 18), App.Rotation())
+        st.update(cam=cam, j2=j)
+        st["parts"].append(cam)
+        if st["asm"].solve() != 0:
+            raise RuntimeError("the assembly did not solve with the cam joint")
+        return placed()
+
+    def s4(_):
+        g = joint("Gears", st["ring"], circle(st["ring"], (-40, 0, 30), 22), st["cam"], circle(st["cam"], (13.5, 0, 30), 1), "Gear")
+        g.Distance = 3
+        g.Distance2 = 1
+        if st["asm"].solve() != 0:
+            raise RuntimeError("the assembly did not solve with the gear")
+        return placed()
+
+    def s5(_):
+        asm = st["asm"]
+        sim = UtilsAssembly.getSimulationGroup(asm).newObject("App::FeaturePython", "Simulation")
+        Simulation(sim)
+        sim.bTimeEnd, sim.cTimeStepOutput = 0.35, 0.01
+        motion = asm.newObject("App::FeaturePython", "Motion")
+        Motion(motion, "Angular", st["j1"], "%.15f*time" % (math.radians(10) / 0.01))  # 10 degrees per frame
+        sim.Group = sim.Group + [motion]
+        st["doc"].recompute()
+        asm.generateSimulation(sim)
+        n = asm.numberOfFrames()
+        exp = values.TESTS[TEST][5]["motion"]
+        frames, bad = [], []
+        for f in range(n):
+            asm.updateForFrame(f)
+            frames.append((f, zangle(st["ring"]), zangle(st["cam"])))
+        angles = frames[-len(exp["steps"]):]
+        st["frames"] = [f for f, _, _ in angles]
+        for want, (f, r, c) in zip(exp["steps"], angles):
+            dr = abs(((r - want + 180) % 360) - 180)
+            dc = abs(((c - exp["ratio"] * r + 180) % 360) - 180)
+            if dr > exp["tol_deg"] or dc > exp["tol_deg"]:
+                bad.append("frame %d: ring %.9f (want %g), cam %.9f (want %.9f)" % (f, r, want, c, (exp["ratio"] * r) % 360))
+                break
+        if len(angles) < len(exp["steps"]):
+            bad.append("%d frames, expected %d" % (len(angles), len(exp["steps"])))
+        return placed(), bad
+
+    def s6(_):
+        asm, bad = st["asm"], []
+        for f in st["frames"]:
+            asm.updateForFrame(f)
+            shapes = [(o.Name, o.Shape) for o in st["parts"]]
+            for i in range(len(shapes)):
+                for j in range(i + 1, len(shapes)):
+                    v = shapes[i][1].common(shapes[j][1]).Volume
+                    if v > 1e-9:
+                        bad.append("frame %d: %s and %s overlap by %.3g mm3" % (f, shapes[i][0], shapes[j][0], v))
+            if bad:
+                break
+        return placed(), bad
+
+    return [s1, s2, s3, s4, s5, s6]
+
+
 BUILDERS = {"acid-1": acid1, "acid-2": acid2, "acid-3": acid3, "acid-4": acid4, "acid-5": acid5,
-            "acid-6": acid6, "acid-7": acid7, "acid-8": acid8, "acid-9": acid9, "acid-10": acid10}
+            "acid-6": acid6, "acid-7": acid7, "acid-8": acid8, "acid-9": acid9, "acid-10": acid10,
+            "acid-11": acid11}
 
 
 def main():
@@ -413,14 +549,18 @@ def main():
         with open(OUT + ".progress", "w") as f:
             f.write("%d %f\n" % (n, time.time()))
         t0 = time.time()
+        extra = []
         try:
             shape = stages[n - 1](shape)
+            if isinstance(shape, tuple):
+                shape, extra = shape
         except Exception as e:  # FreeCAD raises Part.OCCError and others for a refused operation
             emit({"stage": n, "outcome": "error", "seconds": round(time.time() - t0, 3),
                   "detail": "%s: %s" % (type(e).__name__, str(e).strip()[:300])})
             break
         secs = round(time.time() - t0, 3)
         m, bad = check(n, shape, prev_v)
+        bad += extra
         emit({"stage": n, "outcome": "pass" if not bad else "fail", "seconds": secs, "measured": m,
               "detail": "; ".join(bad)})
         prev_v = m["volume_mm3"]

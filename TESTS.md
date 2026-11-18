@@ -1,15 +1,12 @@
-# The ten acid tests
+# The acid tests
 
 All lengths are in mm and all angles in degrees. Z is up. "Clear of" means the closest distance between the two things named. Every model can be built: none asks for geometry that cannot exist. A refusal, a timeout or a wrong result therefore counts as a failure.
 
-Every test uses only solid-modelling operations that any general CAD program has built in:
-- primitives, extrude and loft;
-- booleans and patterns;
-- rounds and chamfers;
-- shell and draft;
-- split, mirror and move.
+Every test uses only operations that a general CAD program has built in:
+- **acid-1 to acid-10:** solid modelling only: primitives, extrude and loft; booleans and patterns; rounds and chamfers; shell and draft; split, mirror and move.
+- **acid-11:** adds an assembly, with joints, a gear and a driven motion, using the program's own assembly tools. In FreeCAD that is its built-in Assembly workbench.
 
-There is no sheet metal, no assembly, and nothing from a plug-in or an add-on workbench.
+There is no sheet metal, and nothing from a plug-in or an add-on.
 
 Each test says why it exists and what it stresses inside a geometric kernel. Where a test came from the [stress corpus](https://github.com/dutchman-cad/stress-corpus), the issue that first showed the failure is named.
 
@@ -203,3 +200,20 @@ A draft angle is measured from the pull direction (+Z), as CAD programs define i
 4. Cut a groove 0.00001 deep across the −Y face: a box from (20, −1, −1) to (30, 0.00001, 51).
 5. Round the four vertical edges of the block with R 5.
 6. Move everything by (1000000, 1000000, 0).
+
+## acid-11 Orrery: an assembly with geared joints and a 0.5 mm near miss
+
+**Why.** Assemblies put the kernel to work in another way: parts must be placed through joints, a gear ratio must hold exactly through a full turn, and interference has to be decided between curved parts that come within half a millimetre of each other. A check that works on display meshes reports contact that is not there. A check that is too loose misses contact that is. The parts reuse geometry from acid-1 and acid-2, taken at stages that build in every program measured, so this test measures the assembly rather than those tests again.
+
+**What it stresses:**
+- joint placement on circular edges;
+- a gear constraint held at every step of a full turn;
+- interference between a torus rim and a spline cam whose closest approach is 0.4968, edge to edge in one plane;
+- doing it 36 times.
+
+1. Make the base: a 160 × 100 × 10 plate from (−80, −50, 0) to (80, 50, 10), with two Ø6 × 2 pins standing on its top face at (−40, 0) and (13.5, 0). Ground it.
+2. Make the ring: acid-1 at stage 3 (the half torus with its boss and notch), moved by (−40, 0, 30) so its flat face is at Z = 30 and its axis passes through the first pin. Join it to the base with a revolute joint about that axis.
+3. Make the cam: acid-2 at stage 3 (the extruded outline, its R 3 round and four bosses), scaled by 0.25 about the origin. Cut a Ø2 axle hole through it on its axis (Z, through the origin), and move it by (13.5, 0, 30). Join it to the base with a revolute joint about the axis through the second pin. The outline reaches 15.0032 from its axis, so the cam's tip passes 0.4968 from the ring's rim.
+4. Gear the ring to the cam at 1 : 3, so the cam turns three times as fast, the other way.
+5. Drive the ring from 0° to 350° in 36 steps of 10°. At every step the cam's angle must be −3 × the ring's, modulo 360°, to 1e-6°.
+6. At every step, check every pair of parts for interference. There must be none.

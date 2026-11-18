@@ -171,7 +171,7 @@ def acid8():
         [cyl(50, 120, [0, 0, 0], op="new", body_name="Part")],
         [cyl(3, 20, [50, 0, 20], [-1, 0, 0], name="Hole1"),
          C("solid.pattern.circular", features=["Hole1"], axis="Z", count=24, name="Ring1")],
-        [C("solid.pattern.rectangular", features=["Hole1", "Ring1"], dir1=[0, 0, 1], count1=5, spacing1=20)],
+        [C("solid.pattern.rectangular", features=["Ring1"], dir1=[0, 0, 1], count1=5, spacing1=20)],
         [cyl(2, 3, polar(30, 15 * k, 120), op="join") for k in range(7)],
         [C("solid.shell", faces=[], thickness=2, direction="inside", body="Part")],
         [C("solid.split_body", body="Part", plane={"origin": [0, 0, 61], "normal": [0, 0, 1]})],
@@ -232,8 +232,83 @@ def acid10():
     ]
 
 
+def renamed(stages, name):
+    """Earlier stages' commands with the body called Part renamed, for reuse as an assembly part."""
+    def fix(v):
+        if v == "Part":
+            return name
+        if isinstance(v, list):
+            return [fix(x) for x in v]
+        if isinstance(v, dict):
+            return {k: fix(x) for k, x in v.items()}
+        return v
+    return [fix(c) for st in stages for c in st]
+
+
+def acid11():
+    part = lambda n: [C("component.create", name=n, parent="root", activate=False),
+                      C("component.move_bodies", bodies=[n], component=n)]
+    revolute = lambda name, b, x: C("joint.create", type="revolute", name=name, flip=True,
+                                    a={"occurrence": "Base", "point": [x, 0, 30], "z": [0, 0, 1]},
+                                    b={"occurrence": b, "point": [x, 0, 30], "z": [0, 0, 1]}, quiet=True)
+    steps = [10 * k for k in range(36)]
+    return [
+        [box(160, 100, 10, corner=[-80, -50, 0], body_name="Base"),
+         cyl(3, 2, [-40, 0, 10], op="join", targets=["Base"]), cyl(3, 2, [13.5, 0, 10], op="join", targets=["Base"])]
+        + part("Base") + [C("occurrence.ground", occurrence="Base:1", grounded=True)],
+        renamed(acid1()[:3], "Ring") + [C("solid.move", bodies=["Ring"], translate=[-40, 0, 30])] + part("Ring")
+        + [revolute("J1", "Ring", -40)],
+        renamed(acid2()[:3], "Cam") + [C("solid.scale", bodies=["Cam"], factor=0.25, origin=[0, 0, 0]),
+                                       cyl(1, 50, [0, 0, -10], targets=["Cam"]),
+                                       C("solid.move", bodies=["Cam"], translate=[13.5, 0, 30])] + part("Cam")
+        + [revolute("J2", "Cam", 13.5)],
+        [C("joint.gear", a="J1", b="J2", ra=3, rb=1)],
+        sum(([C("joint.drive", joint="J1", value=a, quiet=True), C("joint.list")] for a in steps), []),
+        sum(([C("joint.drive", joint="J1", value=a, quiet=True), C("inspect.interference")] for a in steps), []),
+    ]
+
+
 BUILDERS = {"acid-1": acid1, "acid-2": acid2, "acid-3": acid3, "acid-4": acid4, "acid-5": acid5,
-            "acid-6": acid6, "acid-7": acid7, "acid-8": acid8, "acid-9": acid9, "acid-10": acid10}
+            "acid-6": acid6, "acid-7": acid7, "acid-8": acid8, "acid-9": acid9, "acid-10": acid10,
+            "acid-11": acid11}
+
+
+def joint_value(listing, name):
+    for j in listing.get("joints", listing if isinstance(listing, list) else []):
+        if j.get("name") == name:
+            vals = j.get("values") or []
+            return vals[0].get("value") if vals and isinstance(vals[0], dict) else (vals[0] if vals else j.get("value"))
+    return None
+
+
+def check_assembly(exp, res, stage_from):
+    """acid-11's motion and interference stages, from the replies of the stage's own commands."""
+    bad = []
+    rs = [r for r in res[stage_from:] if isinstance(r, dict)]
+    if "motion" in exp:
+        mo = exp["motion"]
+        listings = [r for r in rs if "joints" in r]
+        if len(listings) != len(mo["steps"]):
+            bad.append("%d joint listings, expected %d" % (len(listings), len(mo["steps"])))
+        for a, lst in zip(mo["steps"], listings):
+            r1, r2 = joint_value(lst, "J1"), joint_value(lst, "J2")
+            if r1 is None or r2 is None:
+                bad.append("no joint values at %g" % a)
+                break
+            want = (mo["ratio"] * r1) % 360
+            err = min(abs((r2 % 360) - want), 360 - abs((r2 % 360) - want))
+            if abs(((r1 - a + 180) % 360) - 180) > mo["tol_deg"] or err > mo["tol_deg"]:
+                bad.append("at %g: ring %.9f, cam %.9f, cam should be %.9f" % (a, r1, r2, want))
+                break
+    if exp.get("interference") == "none":
+        reps = [r for r in rs if "interferences" in r]
+        if len(reps) != 36:
+            bad.append("%d interference checks, expected 36" % len(reps))
+        for k, r in enumerate(reps):
+            if r.get("count") or r.get("unchecked"):
+                bad.append("step %d: %s" % (k, json.dumps(r.get("interferences") or r.get("unchecked"))[:200]))
+                break
+    return bad
 
 
 # ------------------------------------------------------------------ running and checking
@@ -334,6 +409,9 @@ def run_test(cli, test, version, out, limit, tmp):
         else:
             stage_ms = sum(r.get("ms", 0) or 0 for r in res[len(so_far):len(cmds)] if isinstance(r, dict))
             m, bad, skipped = check(test, n, res, len(cmds), prev_v, stage_ms)
+            exp = values.TESTS[test][n]
+            if "motion" in exp or "interference" in exp:
+                bad += check_assembly(exp, res[:len(cmds)], len(so_far))
             rec.update(outcome="pass" if not bad else "fail", seconds=round(stage_ms / 1000, 3), measured=m,
                        detail="; ".join(bad))
             if skipped:

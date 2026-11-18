@@ -27,7 +27,7 @@ The values are in [`expected/values.py`](expected/values.py). It is plain Python
 
 | Program | Harness | Probes |
 |---|---|---|
-| FreeCAD | `freecad/acid.py`, inside `freecadcmd`, using only the core Part and PartDesign modules; `tools/run_freecad.py` runs one process per test and enforces the time limit | `Solid.isInside` at the point |
+| FreeCAD | `freecad/acid.py`, inside `freecadcmd`, using only the core Part and PartDesign modules, plus the built-in Assembly workbench for acid-11; `tools/run_freecad.py` runs one process per test and enforces the time limit | `Solid.isInside` at the point |
 | SolidCraft | `solidcraft/acid.py`, which runs `solidcraft-cli run` with the script up to each stage | a 0.0002 mm cube at the point counts as inside when at least half of it overlaps the result (`inspect.clearance`), which is exact for a point 0.000005 mm or more from a surface |
 
 A stage that cannot be built stops the test: later stages build on it. A stage that builds but fails a check is recorded, and the test goes on, but the score counts only the stages before the first failure.
