@@ -6,6 +6,7 @@ This is a comparison: how well does each CAD program build the same hard models?
 
 - **SolidCraft:** every minor release from 0.20.0 to 0.44.0, plus 0.44.1, as a baseline. After that, every new release.
 - **FreeCAD:** run as a separate program through its public Python API.
+- **SOLIDWORKS:** run as a separate program through its COM API, with its core features only.
 - **Fusion:** built from [PLAN.md](PLAN.md), with the version recorded. Other programs can be added the same way.
 
 Every program is held to the same standard:
@@ -30,14 +31,16 @@ The details are in [PLAN.md](PLAN.md).
 - [`TESTS.md`](TESTS.md): the eleven tests, acid-1 to acid-11, with why each exists, what it stresses in a kernel, and every dimension.
 - [`PLAN.md`](PLAN.md): conventions, checks, and how each program is run.
 - [`expected/values.py`](expected/values.py): the expected values and probe points for every stage.
-- `freecad/`, `solidcraft/`: one harness per program.
+- `freecad/`, `fusion/`, `solidcraft/`, `solidworks/`: one harness per program.
 - `results/`: one JSON line per program, version, test and stage.
-- `tools/`: `run_freecad.py`, and `site.py`, which writes the scoreboard and the site in `docs/`.
+- `tools/`: `run_freecad.py`, `run_fusion.py`, `run_solidworks.py`, and `site.py`, which writes the scoreboard and the site in `docs/`.
 
 ## Running
 
 ```
 python tools/run_freecad.py <path to freecadcmd>
+python tools/run_fusion.py
 python solidcraft/acid.py <path to solidcraft-cli>
+python tools/run_solidworks.py
 python tools/site.py
 ```
