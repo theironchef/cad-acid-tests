@@ -1641,21 +1641,21 @@ def acid10():
 
     def s2(p):
         s = p.sketch(p.right, "Cylinder")
-        s.circle((0, 25, 59.99999), 10)
+        s.circle((0, 25, 59.99998), 10)
         p.extrude(s.done(), 50, "Cylinder", direction=(1, 0, 0))
         return p
 
     def s3(p):
         s = p.sketch(p.plane(p.front, 25, "Z25"), "Sphere")
         s.line((48, 25, 25), (82, 25, 25), construction=True)
-        s.arc((64.99999, 25, 25), (49.99999, 25, 25), (79.99999, 25, 25), (64.99999, 40, 25))
-        s.line((79.99999, 25, 25), (49.99999, 25, 25))
+        s.arc((64.99998, 25, 25), (49.99998, 25, 25), (79.99998, 25, 25), (64.99998, 40, 25))
+        s.line((79.99998, 25, 25), (49.99998, 25, 25))
         p.revolve(s.done(), "Sphere")
         return p
 
     def s4(p):
         s = p.sketch(p.plane(p.front, -1, "Z-1"), "Groove")
-        s.rect((20, -1), (30, 0.00001), -1)
+        s.rect((20, -1), (30, 0.00002), -1)
         p.cut(s.done(), "Groove", depth=52, direction=(0, 0, 1))
         return p
 

@@ -680,13 +680,13 @@ def acid10():
         add([t_box(0, 0, 0, 50, 50, 50)])
 
     def s2():
-        combine_temps(body(), [t_cyl(10, 50, (0, 25, 59.99999), (1, 0, 0))], "join")
+        combine_temps(body(), [t_cyl(10, 50, (0, 25, 59.99998), (1, 0, 0))], "join")
 
     def s3():
-        combine_temps(body(), [t_sphere(15, (64.99999, 25, 25))], "join")
+        combine_temps(body(), [t_sphere(15, (64.99998, 25, 25))], "join")
 
     def s4():
-        combine_temps(body(), [t_box(20, -1, -1, 30, 0.00001, 51)], "cut")
+        combine_temps(body(), [t_box(20, -1, -1, 30, 0.00002, 51)], "cut")
 
     def s5():
         b = body()

@@ -6,10 +6,10 @@ Each cell is the number of stages passed before the first one that does not, out
 
 | Program | Total | acid-1 | acid-2 | acid-3 | acid-4 | acid-5 | acid-6 | acid-7 | acid-8 | acid-9 | acid-10 | acid-11 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| SolidCraft 0.46.1 | **37/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 2/7 wrong result | 3/6 refused | 1/6 wrong result | **6/6** |
+| SolidCraft 0.46.1 | **37/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 2/7 wrong result | 3/6 refused | 1/6 refused | **6/6** |
 | FreeCAD 1.1.4 | **46/72** | 3/8 refused | 3/8 refused | 5/7 refused | **6/6** | 4/6 refused | 3/6 wrong result | 2/6 wrong result | 4/7 wrong result | 4/6 refused | **6/6** | **6/6** |
 | Fusion 2706.1.17 | **60/72** | 6/8 wrong result | **8/8** | 6/7 refused | **6/6** | **6/6** | 4/6 wrong result | 2/6 wrong result | 5/7 wrong result | 5/6 wrong result | **6/6** | **6/6** |
 | SOLIDWORKS 2026 SP4.1 | **47/72** | **8/8** | 3/8 refused | 5/7 refused | 4/6 wrong result | 3/6 refused | **6/6** | 5/6 refused | 4/7 wrong result | 1/6 wrong result | 2/6 wrong result | **6/6** |
-| SolidCraft 0.45.0 | **39/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 2/7 wrong result | 3/6 refused | 3/6 wrong result | **6/6** |
-| SolidCraft 0.44.0 | **36/72** | 3/8 timeout | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | 4/6 refused | 2/6 refused | 2/7 refused | 3/6 refused | 3/6 wrong result | **6/6** |
+| SolidCraft 0.45.0 | **37/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 2/7 wrong result | 3/6 refused | 1/6 refused | **6/6** |
+| SolidCraft 0.44.0 | **34/72** | 3/8 timeout | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | 4/6 refused | 2/6 refused | 2/7 refused | 3/6 refused | 1/6 refused | **6/6** |
 | SolidCraft 0.30.1 | **20/72** | 0/8 wrong result | 3/8 refused | 5/7 refused | 1/6 wrong result | 4/6 refused | 0/6 wrong result | 0/6 wrong result | 0/7 wrong result | 0/6 wrong result | 1/6 wrong result | **6/6** |

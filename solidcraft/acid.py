@@ -227,9 +227,9 @@ def acid9():
 def acid10():
     return [
         [box(50, 50, 50, corner=[0, 0, 0], body_name="Part")],
-        [cyl(10, 50, [0, 25, 59.99999], "X", op="join")],
-        [C("solid.sphere", radius=15, center=[64.99999, 25, 25], operation="join", targets=["Part"])],
-        [box(10, 1.00001, 52, corner=[20, -1, -1], op="cut")],
+        [cyl(10, 50, [0, 25, 59.99998], "X", op="join")],
+        [C("solid.sphere", radius=15, center=[64.99998, 25, 25], operation="join", targets=["Part"])],
+        [box(10, 1.00002, 52, corner=[20, -1, -1], op="cut")],
         [C("solid.fillet", edges=[[x, y, 25] for x in (0, 50) for y in (0, 50)], radius=5, tangent_chain=False,
            body="Part")],
         [C("solid.move", bodies=["Part"], translate=[1000000, 1000000, 0])],

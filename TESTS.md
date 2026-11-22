@@ -186,18 +186,18 @@ A draft angle is measured from the pull direction (+Z), as CAD programs define i
 
 ## acid-10 Near misses: tolerance-sized slivers, 1 km from the origin
 
-**Why.** Every kernel has a tolerance below which two things count as touching. Geometry placed just above it, a dip of 0.00001 or a groove 0.00001 deep, has to be kept, and kept exact, without the kernel merging it away or choking on it. Moving the whole part 1 km from the origin then spends about 20 of a double's 52 bits of precision on position, leaving fewer for those details. The stress corpus's largest surprise was how many failures came down to this alone.
+**Why.** Every kernel has a tolerance below which two things count as touching. Geometry placed just past it, a dip of 0.00002 or a groove 0.00002 deep, has to be kept, and kept exact, without the kernel merging it away or choking on it. The details sit 0.00002 in, clearly past a 0.00001 tolerance rather than at it, because some kernels read a contact at exactly their tolerance as touching. Moving the whole part 1 km from the origin then spends about 20 of a double's 52 bits of precision on position, leaving fewer for those details. The stress corpus's largest surprise was how many failures came down to this alone.
 
 **What it stresses:**
-- near-tangent unions: a cylinder lying on a face and a sphere touching a face, each dipping in by 0.00001;
-- a 0.00001-deep cut;
+- near-tangent unions: a cylinder lying on a face and a sphere touching a face, each dipping in by 0.00002;
+- a 0.00002-deep cut;
 - rounds next to all of them;
 - a move to 1 km from the origin, which must not lose a detail that small.
 
 1. Make a 50 × 50 × 50 block from the origin.
-2. Join a Ø20 × 50 cylinder along X, with its axis at Y = 25, Z = 59.99999, so its side dips 0.00001 into the top face.
-3. Join a Ø30 sphere centred at (64.99999, 25, 25), so it dips 0.00001 into the +X face.
-4. Cut a groove 0.00001 deep across the −Y face: a box from (20, −1, −1) to (30, 0.00001, 51).
+2. Join a Ø20 × 50 cylinder along X, with its axis at Y = 25, Z = 59.99998, so its side dips 0.00002 into the top face.
+3. Join a Ø30 sphere centred at (64.99998, 25, 25), so it dips 0.00002 into the +X face.
+4. Cut a groove 0.00002 deep across the −Y face: a box from (20, −1, −1) to (30, 0.00002, 51).
 5. Round the four vertical edges of the block with R 5.
 6. Move everything by (1000000, 1000000, 0).
 

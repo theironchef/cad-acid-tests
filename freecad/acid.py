@@ -394,9 +394,9 @@ def acid9():
 def acid10():
     return [
         lambda s: Part.makeBox(50, 50, 50),
-        lambda s: s.fuse(Part.makeCylinder(10, 50, V(0, 25, 59.99999), V(1, 0, 0))),
-        lambda s: s.fuse(Part.makeSphere(15, V(64.99999, 25, 25))),
-        lambda s: s.cut(Part.makeBox(10, 1.00001, 52, V(20, -1, -1))),
+        lambda s: s.fuse(Part.makeCylinder(10, 50, V(0, 25, 59.99998), V(1, 0, 0))),
+        lambda s: s.fuse(Part.makeSphere(15, V(64.99998, 25, 25))),
+        lambda s: s.cut(Part.makeBox(10, 1.00002, 52, V(20, -1, -1))),
         lambda s: s.makeFillet(5, [edges_near(s, (x, y, 25))[0] for x in (0, 50) for y in (0, 50)]),
         lambda s: s.translated(V(1000000, 1000000, 0)),
     ]

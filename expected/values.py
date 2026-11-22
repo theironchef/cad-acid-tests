@@ -331,19 +331,21 @@ A9 = {
 }
 
 # ------------------------------------------------------------------ acid-10 Near misses
-_seg = 10 * 10 * math.acos(1 - 1e-5 / 10) - (10 - 1e-5) * sqrt(2 * 10 * 1e-5 - 1e-10)
-_cap10 = pi * 1e-5 ** 2 * (3 * 15 - 1e-5) / 3
+_h10 = 2e-5  # the dips and the groove: 0.00002 deep, clearly past a 0.00001 tolerance
+_seg = 10 * 10 * math.acos(1 - _h10 / 10) - (10 - _h10) * sqrt(2 * 10 * _h10 - _h10 ** 2)  # circular segment, r 10
+_cap10 = pi * _h10 ** 2 * (3 * 15 - _h10) / 3  # spherical cap, R 15
 _F = (1e6, 1e6, 0)
 A10 = {
     1: dict(bodies=1, vol=("exact", 125000.0)),
     2: dict(bodies=1, vol=("exact", 125000 + pi * 100 * 50 - _seg * 50), inside=[(25, 25, 55), (25, 25, 50.000005)]),
     3: dict(bodies=1, vol=("exact", 125000 + pi * 100 * 50 - _seg * 50 + 4 / 3 * pi * 15 ** 3 - _cap10),
             inside=[(79, 25, 25), (50.000005, 25, 25)]),
-    4: dict(bodies=1, outside=[(25, 0.000005, 25)], inside=[(25, 0.00002, 25), (15, 0.000005, 25)]),
+    # in the groove at its mid-depth; past its floor; beside it at the same depth
+    4: dict(bodies=1, outside=[(25, _h10 / 2, 25)], inside=[(25, 2 * _h10, 25), (15, _h10 / 2, 25)]),
     5: dict(bodies=1, vol=("delta", -4 * QR * 25 * 50, -4 * QR * 25 * 50), outside=[(0.1, 0.1, 25)]),
     6: dict(bodies=1, vol=("delta", 0, 0),
-            outside=[(_F[0] + 25, _F[1] + 0.000005, 25), (_F[0] + 0.1, _F[1] + 0.1, 25)],
-            inside=[(_F[0] + 25, _F[1] + 0.00002, 25), (_F[0] + 79, _F[1] + 25, 25)]),
+            outside=[(_F[0] + 25, _F[1] + _h10 / 2, 25), (_F[0] + 0.1, _F[1] + 0.1, 25)],
+            inside=[(_F[0] + 25, _F[1] + 2 * _h10, 25), (_F[0] + 79, _F[1] + 25, 25)]),
 }
 
 # ------------------------------------------------------------------ acid-11 Orrery

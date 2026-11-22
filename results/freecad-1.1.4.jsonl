@@ -45,12 +45,12 @@
 {"stage": 3, "outcome": "pass", "seconds": 0.025, "measured": {"bodies": 1, "volume_mm3": 36998.891776313365, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-9"}
 {"stage": 4, "outcome": "pass", "seconds": 0.303, "measured": {"bodies": 1, "volume_mm3": 36983.075543601946, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-9"}
 {"stage": 5, "outcome": "error", "seconds": 0.022, "detail": "OCCError: BRep_API: command not done", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-9"}
-{"stage": 1, "outcome": "pass", "seconds": 0.0, "measured": {"bodies": 1, "volume_mm3": 124999.99999999999, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
-{"stage": 2, "outcome": "pass", "seconds": 0.0, "measured": {"bodies": 1, "volume_mm3": 140707.9632585212, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
-{"stage": 3, "outcome": "pass", "seconds": 0.005, "measured": {"bodies": 1, "volume_mm3": 154845.13019967068, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
-{"stage": 4, "outcome": "pass", "seconds": 0.0, "measured": {"bodies": 1, "volume_mm3": 154845.12519967085, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
-{"stage": 5, "outcome": "pass", "seconds": 0.016, "measured": {"bodies": 1, "volume_mm3": 153772.1160166582, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
-{"stage": 6, "outcome": "pass", "seconds": 0.0, "measured": {"bodies": 1, "volume_mm3": 153772.1160166628, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
+{"stage": 1, "outcome": "pass", "seconds": 0.012, "measured": {"bodies": 1, "volume_mm3": 124999.99999999999, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
+{"stage": 2, "outcome": "pass", "seconds": 1.457, "measured": {"bodies": 1, "volume_mm3": 140707.96324128305, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
+{"stage": 3, "outcome": "pass", "seconds": 0.254, "measured": {"bodies": 1, "volume_mm3": 154845.13018241854, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
+{"stage": 4, "outcome": "pass", "seconds": 0.09, "measured": {"bodies": 1, "volume_mm3": 154845.12018241885, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
+{"stage": 5, "outcome": "pass", "seconds": 0.221, "measured": {"bodies": 1, "volume_mm3": 153772.11099940626, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
+{"stage": 6, "outcome": "pass", "seconds": 0.003, "measured": {"bodies": 1, "volume_mm3": 153772.11099940713, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-10"}
 {"stage": 1, "outcome": "pass", "seconds": 0.155, "measured": {"bodies": 1, "volume_mm3": 160113.09733552925, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-11"}
 {"stage": 2, "outcome": "pass", "seconds": 0.02, "measured": {"bodies": 2, "volume_mm3": 179066.58455955173, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-11"}
 {"stage": 3, "outcome": "pass", "seconds": 0.139, "measured": {"bodies": 3, "volume_mm3": 181935.23301432616, "valid": true}, "detail": "", "pipeline": "freecad", "version": "FreeCAD 1.1.4", "test": "acid-11"}
