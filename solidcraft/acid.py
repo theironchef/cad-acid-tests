@@ -175,7 +175,10 @@ def acid8():
         [cyl(50, 120, [0, 0, 0], op="new", body_name="Part")],
         [cyl(3, 20, [50, 0, 20], [-1, 0, 0], name="Hole1"),
          C("solid.pattern.circular", features=["Hole1"], axis="Z", count=24, name="Ring1")],
-        [C("solid.pattern.rectangular", features=["Ring1"], dir1=[0, 0, 1], count1=5, spacing1=20)],
+        # A pattern of a pattern copies the inner pattern's copies, not its source, in SolidCraft as
+        # in Fusion (a rectangular pattern of Ring1 alone leaves each new ring without its first
+        # hole: 92 holes, not 96), so the ring is the hole and its pattern together.
+        [C("solid.pattern.rectangular", features=["Hole1", "Ring1"], dir1=[0, 0, 1], count1=5, spacing1=20)],
         [cyl(2, 3, polar(30, 15 * k, 120), op="join") for k in range(7)],
         [C("solid.shell", faces=[], thickness=2, direction="inside", body="Part")],
         [C("solid.split_body", body="Part", plane={"origin": [0, 0, 61], "normal": [0, 0, 1]})],
