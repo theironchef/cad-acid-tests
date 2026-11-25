@@ -6,13 +6,14 @@ Each cell is the number of stages passed before the first one that does not, out
 
 | Program | Total | acid-1 | acid-2 | acid-3 | acid-4 | acid-5 | acid-6 | acid-7 | acid-8 | acid-9 | acid-10 | acid-11 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| SolidCraft 0.47.0 | **38/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 2/7 wrong result | 3/6 refused | 2/6 refused | **6/6** |
+| SolidCraft 0.49.0 | **40/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 4/7 timeout | 3/6 refused | 2/6 refused | **6/6** |
 | solidcore 70b183bf6 (main 2026-11-23, stage-faithful) (kernel only, no app) | **38/72** | 4/8 refused | 3/8 refused | 5/7 timeout | 3/6 wrong result | 3/6 refused | **6/6** | 2/6 refused | 4/7 timeout | 3/6 refused | 2/6 refused | 3/6 not run |
 | solidcore 70b183bf6 (main 2026-11-23, kernel ops 1:1) (kernel only, no app) | **22/72** | 3/8 not run | 0/8 not run | 2/7 not run | 3/6 wrong result | 1/6 not run | 3/6 not run | 2/6 not run | 4/7 not run | 0/6 not run | 2/6 refused | 2/6 not run |
 | FreeCAD 1.1.4 | **46/72** | 3/8 refused | 3/8 refused | 5/7 refused | **6/6** | 4/6 refused | 3/6 wrong result | 2/6 wrong result | 4/7 wrong result | 4/6 refused | **6/6** | **6/6** |
 | Fusion 2706.1.17 | **60/72** | 6/8 wrong result | **8/8** | 6/7 refused | **6/6** | **6/6** | 4/6 wrong result | 2/6 wrong result | 5/7 wrong result | 5/6 wrong result | **6/6** | **6/6** |
 | Fusion 2706.1.17 (TemporaryBRepManager, no features) | **25/72** | 3/8 not run | 0/8 not run | 2/7 not run | 5/6 not run | 1/6 not run | 3/6 not run | 2/6 not run | 4/7 not run | 0/6 not run | 3/6 wrong result | 2/6 not run |
 | SOLIDWORKS 2026 SP4.1 | **47/72** | **8/8** | 3/8 refused | 5/7 refused | 4/6 wrong result | 3/6 refused | **6/6** | 5/6 refused | 4/7 wrong result | 1/6 wrong result | 2/6 wrong result | **6/6** |
+| SolidCraft 0.47.0 | **38/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 2/7 wrong result | 3/6 refused | 2/6 refused | **6/6** |
 | SolidCraft 0.46.2 | **38/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 2/7 wrong result | 3/6 refused | 2/6 refused | **6/6** |
 | SolidCraft 0.46.1 | **37/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 2/7 wrong result | 3/6 refused | 1/6 refused | **6/6** |
 | SolidCraft 0.45.0 | **37/72** | 4/8 refused | 3/8 refused | 5/7 refused | 2/6 refused | 3/6 refused | **6/6** | 2/6 refused | 2/7 wrong result | 3/6 refused | 1/6 refused | **6/6** |
