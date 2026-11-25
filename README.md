@@ -32,6 +32,7 @@ The details are in [PLAN.md](PLAN.md).
 - [`PLAN.md`](PLAN.md): conventions, checks, and how each program is run.
 - [`expected/values.py`](expected/values.py): the expected values and probe points for every stage.
 - `freecad/`, `fusion/`, `solidcraft/`, `solidworks/`: one harness per program.
+- `solidcore/`: the kernel-only harness for SolidCraft's kernel (below).
 - `results/`: one JSON line per program, version, test and stage.
 - `tools/`: `run_freecad.py`, `run_fusion.py`, `run_solidworks.py`, and `site.py`, which writes the scoreboard and the site in `docs/`.
 
@@ -42,5 +43,29 @@ python tools/run_freecad.py <path to freecadcmd>
 python tools/run_fusion.py
 python solidcraft/acid.py <path to solidcraft-cli>
 python tools/run_solidworks.py
+python solidcore/acid.py
 python tools/site.py
 ```
+
+## Kernel only: SolidCraft's kernel without the app
+
+`solidcore/` runs the same tests on SolidCraft's kernel, [solidcore](https://github.com/tangency-labs/solidcraft/tree/main/solidcore), with no SolidCraft app in the loop. A disagreement between its row and a SolidCraft release's row points at the layer: a stage the kernel builds but the app refuses is lost in the app's commands; a stage both refuse is the kernel's.
+
+- **What it is.** A small Rust program, `acid-solidcore`, that depends on the kernel's operation layer `solidcore-ops` (the calls the app itself makes for primitives, booleans, extrude and loft, fillet and chamfer, shell, draft, split and moves) and on `solidcore` where ops has no call (the material census and the closed-solid test). It builds each test stage by stage from TESTS.md's geometry, not from the app's commands, and runs the kernel with every fix on, as the app does. The kernel commit is the `rev` pinned in `solidcore/Cargo.toml`; to use a local checkout instead, swap the git dependencies for the `path` ones commented there.
+- **How it is checked.** `solidcore/acid.py` builds the program, runs one process per test, and checks what it measures after each stage against `expected/values.py`, with the same tolerances and score as the CLI harness. It writes `results/solidcore-<short sha>-full.jsonl` (version "… stage-faithful"), rows labelled "kernel only, no app" on the scoreboard.
+- **How it differs from `solidcraft/acid.py`.**
+  - Probe points are classified exactly by the kernel (`Body::classify_point`), not by overlapping 0.0002 mm probe cubes. A point the kernel puts on the boundary fails its probe.
+  - "Valid" is the kernel's closed-solid test and its own validity check (`Body::check`), both required. The CLI harness reads only the closed flag.
+  - Picks are the same points. Edges are the kernel's nearest edges, run on along tangent chains where the app's fillet would; faces are found by the kernel's point classification.
+  - A pattern is its instances, unioned and subtracted in one boolean. acid-3's modelled thread is the ISO M6 × 1 basic groove, screw-swept by the kernel and cut from the hole.
+  - acid-11's gear and driven motion (stages 4 and 5) exist only in the app's assembly, so they are recorded as "not run". Stage 6 still runs: the kernel's contact test is checked at placements worked out from the 1 : 3 ratio.
+  - A stage gets `--limit` seconds (300 by default), counted from the end of the stage before. It is a hang if it does not finish.
+
+```
+python solidcore/acid.py [acid-1 ...] [--limit 300] [--bin path/to/acid-solidcore]
+python solidcore/acid.py --kernel-ops [acid-1 ...]
+```
+
+The default run is stage-faithful (`results/solidcore-<sha>-full.jsonl`): every stage as TESTS.md asks, with the kernel's rounds, shells, drafts, extrude, loft and screw sweep. `--kernel-ops` instead runs the shared neutral spec [`expected/kernel_ops.py`](expected/kernel_ops.py) op for op, the same ops in the same order with the same numbers as the kernel-near Fusion harness, so the two rows compare 1 : 1. Each neutral op is one solidcore-ops call, except a cylinder off the Z axis, which is made on Z, then turned and moved. Its stages marked not expressible are "not run". It writes pipeline `solidcore-kernel` to `results/solidcore-kernel-<sha>.jsonl`.
+
+It needs the kernel's Rust toolchain, which `solidcore/rust-toolchain.toml` pins. Set `CARGO_TARGET_DIR` to keep the build out of the repository.

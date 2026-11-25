@@ -1,0 +1,3 @@
+[net]
+# the solidcraft repository is large: the git CLI fetches it much faster than libgit2
+git-fetch-with-cli = true

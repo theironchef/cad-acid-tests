@@ -1,0 +1,4 @@
+[toolchain]
+# the kernel's own pin (solidcore/rust-toolchain.toml at the pinned commit)
+channel = "1.99.1"
+profile = "minimal"

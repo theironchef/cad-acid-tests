@@ -1,0 +1,21 @@
+[package]
+name = "acid-solidcore"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "The acid tests built with direct calls to SolidCraft's kernel (solidcore-ops and solidcore), no app"
+
+# The kernel, by git at a pinned commit of tangency-labs/solidcraft (its solidcore/ workspace).
+# To build against a local checkout instead, replace both lines with path dependencies:
+#   solidcore-ops = { path = "../../solidcraft/solidcore/crates/solidcore-ops" }
+#   solidcore     = { path = "../../solidcraft/solidcore/crates/solidcore" }
+# acid.py --rev <sha> rewrites the rev below.
+[dependencies]
+solidcore-ops = { git = "https://github.com/tangency-labs/solidcraft", rev = "70b183bf6ae7957b00d24ce9c2be497e1d774899" }
+solidcore = { git = "https://github.com/tangency-labs/solidcraft", rev = "70b183bf6ae7957b00d24ce9c2be497e1d774899" }
+solidcore-record = { git = "https://github.com/tangency-labs/solidcraft", rev = "70b183bf6ae7957b00d24ce9c2be497e1d774899" }
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+debug = false
