@@ -910,6 +910,14 @@ def run(_context: str):
         em = design().exportManager
         em.execute(em.createFusionArchiveExportOptions(PATH))  # noqa: F821
         out["exported"] = PATH  # noqa: F821
+    elif ACTION == "stl":  # noqa: F821  the finished output as one STL, every body and component, for the site
+        em = design().exportManager
+        opt = em.createSTLExportOptions(design().rootComponent, PATH)  # noqa: F821
+        opt.isBinaryFormat = True
+        opt.isOneFilePerBody = False
+        opt.meshRefinement = adsk.fusion.MeshRefinementSettings.MeshRefinementHigh
+        em.execute(opt)
+        out["exported"] = PATH  # noqa: F821
     elif ACTION == "close":  # noqa: F821
         APP.activeDocument.close(False)
         out["closed"] = True

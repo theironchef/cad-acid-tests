@@ -37,3 +37,5 @@ A stage that cannot be built stops the test: later stages build on it. A stage t
 ## Scoring and the site
 
 `python tools/site.py` reads `results/*.jsonl` and writes [SCOREBOARD.md](SCOREBOARD.md) and the site in `docs/`, which is published with GitHub Pages.
+
+The site's pictures are made separately, and graded on nothing. `python tools/reference.py` sketches each test's final stage from TESTS.md as an implicit solid in numpy, with no CAD kernel, and checks the sketch's sampled volume against `expected/values.py`. Each harness, once a test passes every stage, exports the finished output as STL to `meshes/` (gitignored) and renders it with `tools/render.py`, the sketches' renderer, as `docs/img/<test>-<program version>.png`. The site shows a test's sketch beside the renders, and in the results table puts the sketch under the test's name and each render in its full-pass cell.

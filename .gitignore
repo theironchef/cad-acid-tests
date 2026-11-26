@@ -1,3 +1,4 @@
 results/*.progress
 results/*.log
 __pycache__/
+meshes/

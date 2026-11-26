@@ -1,6 +1,7 @@
 """Run the acid tests on a solidcraft-cli build, stage by stage, and check each stage against expected/values.py.
 
 usage: python solidcraft/acid.py <path to solidcraft-cli> [acid-1 ...] [--limit 300] [--out results/x.jsonl]
+                                [--version "SolidCraft 0.50.0 nightly 2026-11-26"] [--render-only]
 
 Each stage is checked by running the script up to and including that stage, then:
   inspect.measure       bodies, closed flags and volumes;
@@ -12,6 +13,11 @@ on one plane"): the probe is then the smallest of 0.002 and 0.02 mm that the rel
 probe_mm with each result. The half-overlap test stays exact in principle at any size (on a flat face the
 overlap is 0.5 + d/h for a point d inside); it leans more on the kernel's volume for points very near a face.
 A stage that does not finish within --limit seconds (on top of the earlier stages' time) is a hang.
+
+When a test passes every stage, its finished output is exported (file.export, STL) to meshes/ (gitignored) and
+rendered by tools/render.py as docs/img/<test>-<version>.png, which the site shows beside the test's sketch.
+--render-only makes only those renders, for the tests the results file (--out) records as passing every stage
+for this version, and writes no results. --version sets the version label (a nightly's, say).
 
 SolidCraft's draft angle is signed (positive tilts the face inward) and relative to the face's own taper
 on a cone, so the absolute angles in TESTS.md are converted here; the geometry asked for is the same.
@@ -27,6 +33,9 @@ import time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "expected"))
 import values  # noqa: E402
+
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import render  # noqa: E402  (numpy is needed only to draw, and only once a test passes every stage)
 
 PROBE = 0.0002
 SKIP_PROBES = {}
@@ -319,14 +328,14 @@ def check_assembly(exp, res, stage_from):
 
 
 # ------------------------------------------------------------------ running and checking
-def run_cli(cli, cmds, timeout, tmp):
+def run_cli(cli, cmds, timeout, tmp, extra=()):
     path, out = os.path.join(tmp, "s.json"), os.path.join(tmp, "s.out.json")
     if os.path.exists(out):
         os.remove(out)
     json.dump({"commands": cmds}, open(path, "w", encoding="utf-8"))
     t0 = time.time()
     try:
-        p = subprocess.run([cli, "run", path, "--param-check", "strict", "--results", "--json-out", out],
+        p = subprocess.run([cli, "run", path, "--param-check", "strict", "--results", "--json-out", out] + list(extra),
                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
     except subprocess.TimeoutExpired:
         return None, "timeout", time.time() - t0
@@ -411,14 +420,46 @@ def probe_size(cli, tmp):
     raise RuntimeError("this release builds no probe cube up to 0.02 mm")
 
 
+def with_upper(stage_cmds, so_far, cli, tmp):
+    if any(c["params"].get("bodies") == ["@upper"] for c in stage_cmds):
+        up = resolve_upper(so_far, cli, tmp)
+        stage_cmds = [dict(c, params=dict(c["params"], bodies=[up])) if c["params"].get("bodies") == ["@upper"]
+                      else c for c in stage_cmds]
+    return stage_cmds
+
+
+def render_finished(cli, test, version, cmds, limit, tmp):
+    """Export the finished output of a test that passed every stage, and render it for the site."""
+    mesh = os.path.join(render.MESHES, "%s-%s.stl" % (test, render.slug(version)))
+    os.makedirs(render.MESHES, exist_ok=True)
+    if os.path.exists(mesh):
+        os.remove(mesh)
+    # file.export rather than run --out: its reply names any body it could not mesh, and "fine" keeps acid-6's
+    # Ø1 ring and needle round beside the Ø1000 sphere
+    res, err, _ = run_cli(cli, cmds + [C("file.export", path=mesh, quality="fine")], limit * 4 + 600, tmp)
+    if err or not os.path.exists(mesh):
+        print("%s: the finished output was not exported (%s)" % (test, err or "no file"), flush=True)
+        return None
+    if res and isinstance(res[-1], dict) and res[-1].get("skipped"):
+        print("%s: bodies left out of the mesh: %s" % (test, res[-1]["skipped"]), flush=True)
+    return render.render_completion(test, version, [mesh])
+
+
+def render_only(cli, test, version, out, limit, tmp):
+    if not render.full_pass(out, test, version, len(values.TESTS[test])):
+        print("%s: %s does not record every stage passing for %s; nothing to render" % (test, out, version))
+        return
+    so_far = []
+    for stage_cmds in BUILDERS[test]():
+        so_far = so_far + with_upper(stage_cmds, so_far, cli, tmp)
+    render_finished(cli, test, version, so_far, limit, tmp)
+
+
 def run_test(cli, test, version, out, limit, tmp):
     stages = BUILDERS[test]()
-    so_far, prev_v, spent = [], None, 0.0
+    so_far, prev_v, spent, passed = [], None, 0.0, 0
     for n, stage_cmds in enumerate(stages, 1):
-        if any(c["params"].get("bodies") == ["@upper"] for c in stage_cmds):
-            up = resolve_upper(so_far, cli, tmp)
-            stage_cmds = [dict(c, params=dict(c["params"], bodies=[up])) if c["params"].get("bodies") == ["@upper"]
-                          else c for c in stage_cmds]
+        stage_cmds = with_upper(stage_cmds, so_far, cli, tmp)
         cmds = so_far + stage_cmds
         res, err, secs = run_cli(cli, cmds + [C("inspect.measure")] + probes_for(test, n), limit + spent * 2 + 60, tmp)
         rec = {"pipeline": "solidcraft", "version": version, "test": test, "stage": n}
@@ -443,14 +484,23 @@ def run_test(cli, test, version, out, limit, tmp):
         with open(out, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec) + "\n")
         print(test, n, rec["outcome"], rec.get("seconds"), (rec.get("detail") or "")[:160], flush=True)
+        passed += rec["outcome"] == "pass"
         if rec["outcome"] in ("error", "hang"):
             break
         so_far = cmds
+    if passed == len(stages):
+        render_finished(cli, test, version, so_far, limit, tmp)
 
 
 def main(argv):
     cli, args = argv[0], argv[1:]
-    limit, out = 300, None
+    limit, out, label, only = 300, None, None, "--render-only" in args
+    if only:
+        args.remove("--render-only")
+    if "--version" in args:
+        i = args.index("--version")
+        label = args[i + 1]
+        del args[i:i + 2]
     if "--limit" in args:
         i = args.index("--limit")
         limit = int(args[i + 1])
@@ -460,10 +510,14 @@ def main(argv):
         out = args[i + 1]
         del args[i:i + 2]
     ver = subprocess.run([cli, "--version"], capture_output=True, text=True).stdout.strip().split()[-1]
-    version = "SolidCraft " + ver
+    version = label or "SolidCraft " + ver
     out = os.path.abspath(out or os.path.join(ROOT, "results", "solidcraft-%s.jsonl" % ver))
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
+        if only:
+            for t in args or list(BUILDERS):
+                render_only(cli, t, version, out, limit, tmp)
+            return
         print("probe cube: %g mm" % probe_size(cli, tmp), flush=True)
         for t in args or list(BUILDERS):
             run_test(cli, t, version, out, limit, tmp)

@@ -1879,7 +1879,7 @@ def main():
             print("selftest: %d wrong %s" % (len(wrong), wrong), flush=True)
             return 1 if wrong else 0
         stages = BUILDERS[TEST]()
-        state, prev_v = None, None
+        state, prev_v, passed = None, None, 0
         for n in range(1, len(values.TESTS[TEST]) + 1):
             progress(n)
             t0 = time.time()
@@ -1915,6 +1915,15 @@ def main():
             print("%s %d %s %.3f s %s" % (TEST, n, "pass" if not bad else "fail", secs, "; ".join(bad)[:200]),
                   flush=True)
             prev_v = m["volume_mm3"]
+            passed += not bad
+        if passed == len(values.TESTS[TEST]) and os.environ.get("AT_MESH"):
+            # the finished output for the site (tools/run_solidworks.py renders it); SOLIDWORKS writes an STL when
+            # the name ends in .stl, and may write an assembly as one file per component, named after this one
+            try:
+                os.makedirs(os.path.dirname(os.environ["AT_MESH"]), exist_ok=True)
+                state.save(os.environ["AT_MESH"])
+            except Exception as e:
+                print("the finished output was not exported: %s" % e, flush=True)
     finally:
         SES.close_all()
         SES.sw.CommandInProgress = cip

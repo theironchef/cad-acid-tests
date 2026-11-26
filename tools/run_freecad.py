@@ -1,17 +1,28 @@
 """Run the acid tests in FreeCAD, one freecadcmd process per test, with a per-stage time limit.
 
 usage: python tools/run_freecad.py <path to freecadcmd> [acid-1 acid-2 ...] [--limit 300] [--out results/x.jsonl]
+                                   [--render-only]
 
 A stage that is still running after --limit seconds is killed and recorded as "hang". Results are
 appended as JSON lines; the default file is results/freecad-<version>.jsonl.
+
+When a test passes every stage, its finished output is written to meshes/ (gitignored) as STL and rendered by
+tools/render.py as docs/img/<test>-freecad-<version>.png, which the site shows beside the test's sketch.
+--render-only runs the tests into a temporary results file instead, so results/ is not touched, and renders
+those that pass every stage.
 """
 import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+sys.path.insert(0, os.path.join(ROOT, "expected"))
+import render  # noqa: E402  (numpy is needed only to draw, and only once a test passes every stage)
+import values  # noqa: E402
 ALL = ["acid-%d" % i for i in range(1, 12)]
 
 
@@ -23,8 +34,11 @@ def version(fc):
     return "unknown"
 
 
-def run_test(fc, test, out, limit):
-    env = dict(os.environ, AT_TEST=test, AT_OUT=out, AT_REPO=ROOT)
+def run_test(fc, test, out, limit, label):
+    mesh = os.path.join(render.MESHES, "%s-%s.stl" % (test, render.slug(label)))
+    if os.path.exists(mesh):
+        os.remove(mesh)
+    env = dict(os.environ, AT_TEST=test, AT_OUT=out, AT_REPO=ROOT, AT_MESH=mesh)
     prog = out + ".progress"
     if os.path.exists(prog):
         os.remove(prog)
@@ -44,6 +58,8 @@ def run_test(fc, test, out, limit):
                                     "seconds": limit, "detail": "no result within %d s" % limit}) + "\n")
             break
     log.close()
+    if os.path.exists(mesh) and render.full_pass(out, test, label, len(values.TESTS[test])):
+        render.render_completion(test, label, [mesh])
 
 
 def main(argv):
@@ -57,12 +73,18 @@ def main(argv):
         i = args.index("--out")
         out = args[i + 1]
         del args[i:i + 2]
+    only = "--render-only" in args
+    if only:
+        args.remove("--render-only")
     tests = args or ALL
-    out = os.path.abspath(out or os.path.join(ROOT, "results", "freecad-%s.jsonl" % version(fc)))
+    v = version(fc)
+    out = os.path.abspath(out or os.path.join(ROOT, "results", "freecad-%s.jsonl" % v))
+    if only:
+        out = os.path.join(tempfile.mkdtemp(), "freecad-%s.jsonl" % v)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     for t in tests:
         t0 = time.time()
-        run_test(fc, t, out, limit)
+        run_test(fc, t, out, limit, "FreeCAD " + v)
         print("%s done in %.0f s" % (t, time.time() - t0), flush=True)
     print("results:", out)
 

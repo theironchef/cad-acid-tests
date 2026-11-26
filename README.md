@@ -34,7 +34,7 @@ The details are in [PLAN.md](PLAN.md).
 - `freecad/`, `fusion/`, `solidcraft/`, `solidworks/`: one harness per program.
 - `solidcore/`: the kernel-only harness for SolidCraft's kernel (below).
 - `results/`: one JSON line per program, version, test and stage.
-- `tools/`: `run_freecad.py`, `run_fusion.py`, `run_solidworks.py`, and `site.py`, which writes the scoreboard and the site in `docs/`.
+- `tools/`: `run_freecad.py`, `run_fusion.py`, `run_solidworks.py`, and `site.py`, which writes the scoreboard and the site in `docs/`; `reference.py` and `render.py` make the pictures (below).
 
 ## Running
 
@@ -44,8 +44,17 @@ python tools/run_fusion.py
 python solidcraft/acid.py <path to solidcraft-cli>
 python tools/run_solidworks.py
 python solidcore/acid.py
+python tools/reference.py
 python tools/site.py
 ```
+
+## Pictures: what each test should look like
+
+The site shows, for each test, a sketch of its final stage and, beside it, what each program built where it passed every stage. Both are drawn by [`tools/render.py`](tools/render.py) in the same view and style, and are in `docs/img/`.
+
+- **The sketch.** [`tools/reference.py`](tools/reference.py) builds each test's final stage from TESTS.md as an implicit solid: a signed distance function in numpy, made of exact primitives (boxes, cylinders, cones, spheres, tori), booleans, shells as offset bands and patterns as folds. Rounds, drafts and acid-2's spline outline are approximated, and the page says how. The sketch's volume is sampled on a grid and checked against `expected/values.py`, at the last stage whose volume that file pins down, and the page gives the result. It needs numpy and Pillow: `python tools/reference.py [acid-1 ...]`.
+- **The programs' output.** When a harness sees a test pass every stage, it exports the finished output as STL to `meshes/` (gitignored) and renders it as `docs/img/<test>-<program version>.png`. SolidCraft's harness uses the CLI's `file.export`, FreeCAD's tessellates the shape, Fusion's exports STL through its API and SOLIDWORKS's saves as STL. `python solidcraft/acid.py <cli> --render-only` and `python tools/run_freecad.py <freecadcmd> --render-only` make only the renders, without writing results. Without numpy the harness keeps the mesh, says so and carries on.
+- **Why this is not circular.** The sketch comes from TESTS.md alone, with no CAD kernel and no program's output, and its volume is checked against the hand-derived values the programs are graded on. A program's picture is only ever of a body that already passed every one of those checks, so the pictures add a look at the shape, never a grade.
 
 ## Kernel only: SolidCraft's kernel without the app
 

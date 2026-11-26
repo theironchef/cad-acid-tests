@@ -5,6 +5,7 @@ PartDesign modules are used: no add-ons and no other workbenches. Environment:
   AT_TEST   the test, e.g. acid-1
   AT_OUT    the results file: one JSON line is appended per stage, as soon as the stage is done
   AT_REPO   the repository root (to import expected/values.py)
+  AT_MESH   optional: when every stage passes, the finished output is tessellated and written here as STL
 tools/run_freecad.py starts this once per test and enforces the per-stage time limit.
 """
 import json
@@ -542,9 +543,23 @@ BUILDERS = {"acid-1": acid1, "acid-2": acid2, "acid-3": acid3, "acid-4": acid4, 
             "acid-11": acid11}
 
 
+def export_mesh(shape, path):
+    """The finished output as a binary STL (tools/render.py renders it for the site)."""
+    sys.path.insert(0, os.path.join(os.environ["AT_REPO"], "tools"))
+    import render
+    bb = shape.BoundBox
+    tol = max(min(bb.DiagonalLength * 1e-4, 0.01), 1e-4)
+    points, facets = [], []
+    for s in shape.Solids:
+        pts, tris = s.tessellate(tol)
+        facets += [(a + len(points), b + len(points), c + len(points)) for a, b, c in tris]
+        points += [(p.x, p.y, p.z) for p in pts]
+    render.write_stl(path, points, facets)
+
+
 def main():
     stages = BUILDERS[TEST]()
-    shape, prev_v = None, None
+    shape, prev_v, passed = None, None, 0
     for n in range(1, len(values.TESTS[TEST]) + 1):
         with open(OUT + ".progress", "w") as f:
             f.write("%d %f\n" % (n, time.time()))
@@ -564,6 +579,9 @@ def main():
         emit({"stage": n, "outcome": "pass" if not bad else "fail", "seconds": secs, "measured": m,
               "detail": "; ".join(bad)})
         prev_v = m["volume_mm3"]
+        passed += not bad
+    if passed == len(values.TESTS[TEST]) and os.environ.get("AT_MESH"):
+        export_mesh(shape, os.environ["AT_MESH"])
 
 
 main()

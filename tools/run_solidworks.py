@@ -11,7 +11,12 @@ workers did not open, and a dialog that blocks it stops the run: it is never cli
 lines; the default file is results/solidworks-<version>.jsonl. SOLIDWORKS redraws every feature while its window is
 open, which makes the stage times several times longer (not the outcomes); with its window minimized the eleven tests
 take a few minutes.
+
+When a test passes every stage, the worker saves its finished output as STL to meshes/ (gitignored), and this
+runner renders it with tools/render.py as docs/img/<test>-solidworks-<version>.png, which the site shows beside
+the test's sketch.
 """
+import glob
 import json
 import os
 import re
@@ -20,6 +25,10 @@ import sys
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+sys.path.insert(0, os.path.join(ROOT, "expected"))
+import render  # noqa: E402  (numpy is needed only to draw, and only once a test passes every stage)
+import values  # noqa: E402
 HARNESS = os.path.join(ROOT, "solidworks", "acid.py")
 ALL = ["acid-%d" % i for i in range(1, 12)]
 HARMLESS = {"tooltips_class32", "SysShadow", "#32768", "IME", "MSCTFIME UI", "swBalloonTip"}
@@ -207,7 +216,10 @@ def main(argv):
         if open_docs() != []:
             raise Stop("SOLIDWORKS holds documents before %s" % t)
         t0 = time.time()
-        env = dict(os.environ, AT_TEST=t, AT_OUT=out, AT_REPO=ROOT)
+        mesh = os.path.join(render.MESHES, "%s-%s.stl" % (t, render.slug(version)))
+        for old in glob.glob(os.path.splitext(mesh)[0] + "*"):
+            os.remove(old)
+        env = dict(os.environ, AT_TEST=t, AT_OUT=out, AT_REPO=ROOT, AT_MESH=mesh)
         with open(out + "." + t + ".log", "w", encoding="utf-8") as log:
             what, info = run_worker([], env, log, limit, out + ".progress")
         if what == "hang":
@@ -226,6 +238,9 @@ def main(argv):
                     f.write(json.dumps({"stage": pg[0], "outcome": "error", "seconds": round(time.time() - pg[1], 3),
                                         "detail": "the worker ended without a result (exit code %s)" % info,
                                         "pipeline": "solidworks", "version": version, "test": t}) + "\n")
+        meshes = glob.glob(os.path.splitext(mesh)[0] + "*.stl") + glob.glob(os.path.splitext(mesh)[0] + "*.STL")
+        if meshes and render.full_pass(out, t, version, len(values.TESTS[t])):
+            render.render_completion(t, version, sorted(set(meshes)))
         print("%s done in %.0f s" % (t, time.time() - t0), flush=True)
     for f in (out + ".progress", out + ".selftest.progress"):
         if os.path.exists(f):

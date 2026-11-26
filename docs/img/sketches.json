@@ -1,0 +1,137 @@
+{
+ "acid-1": {
+  "image": "acid-1-sketch.png",
+  "stage": 8,
+  "note": "the R 0.8 rounds are rolling-ball blends that stop at the notch rather than run around it",
+  "check_stage": 8,
+  "expected": [
+   3870.0,
+   4597.0
+  ],
+  "volume": 4352.94344822827,
+  "rel_err": 0.028213876987899,
+  "outside_rel": 0.0
+ },
+ "acid-2": {
+  "image": "acid-2-sketch.png",
+  "stage": 8,
+  "note": "the spline outline is sampled; the R 3 round and the 3\u00b0 draft are blends of distances",
+  "check_stage": 1,
+  "expected": [
+   183357.42451016864,
+   185200.21269620047
+  ],
+  "volume": 184276.91986590644,
+  "rel_err": 1.0303611085038341e-05,
+  "outside_rel": 0.0
+ },
+ "acid-3": {
+  "image": "acid-3-sketch.png",
+  "stage": 7,
+  "note": "the M6 thread is drawn as its plain \u00d84.917 hole; the R 0.5 rounds stop at the notch",
+  "check_stage": 7,
+  "expected": [
+   16983.475658581603,
+   23999.9999
+  ],
+  "volume": 22252.09778269527,
+  "rel_err": 0.08590584275304897,
+  "outside_rel": 0.0
+ },
+ "acid-4": {
+  "image": "acid-4-sketch.png",
+  "stage": 6,
+  "note": "exact except the R 2 rounds' corners, which are a rounded cube's",
+  "check_stage": 6,
+  "expected": [
+   43205.27691410966,
+   49288.95765992722
+  ],
+  "volume": 48731.3945446263,
+  "rel_err": 0.053717451018405436,
+  "outside_rel": 0.0
+ },
+ "acid-5": {
+  "image": "acid-5-sketch.png",
+  "stage": 6,
+  "note": "the 0.00002 chamfer and 0.000025 round are far below a pixel and left out",
+  "check_stage": 6,
+  "expected": [
+   544.0,
+   672.0
+  ],
+  "volume": 591.8456271583447,
+  "rel_err": 0.02656969217377524,
+  "outside_rel": 0.0
+ },
+ "acid-6": {
+  "image": "acid-6-sketch.png",
+  "stage": 6,
+  "note": "exact; the ring and needle are too thin to see whole, so the insets zoom in",
+  "check_stage": 1,
+  "expected": [
+   523598775.5982006,
+   523598775.5982006
+  ],
+  "volume": 523606713.3317388,
+  "rel_err": 1.5159954354632893e-05,
+  "outside_rel": 1.5159954354632893e-05
+ },
+ "acid-7": {
+  "image": "acid-7-sketch.png",
+  "stage": 6,
+  "note": "the R 0.5 round is a blend along the rim only, not around the six break-outs",
+  "check_stage": 4,
+  "expected": [
+   3061164.6248174952,
+   3061176.4110647845
+  ],
+  "volume": 3061207.951050738,
+  "rel_err": 1.2228364731348187e-05,
+  "outside_rel": 1.0303243732589408e-05
+ },
+ "acid-8": {
+  "image": "acid-8-sketch.png",
+  "stage": 7,
+  "note": "exact; a quarter is cut away to show the closed shell",
+  "check_stage": 4,
+  "expected": [
+   874883.2885423,
+   875561.8725554753
+  ],
+  "volume": 874897.6042084836,
+  "rel_err": 0.00037130707962334256,
+  "outside_rel": 0.0
+ },
+ "acid-9": {
+  "image": "acid-9-sketch.png",
+  "stage": 6,
+  "note": "the twisted faces' distance is approximate; the R 1 rounds are rolling-ball blends",
+  "check_stage": 4,
+  "expected": [
+   36938.89179909979,
+   36998.841799099784
+  ],
+  "volume": 36982.772958873065,
+  "rel_err": 0.0003761586701818629,
+  "outside_rel": 0.0
+ },
+ "acid-10": {
+  "image": "acid-10-sketch.png",
+  "stage": 6,
+  "note": "the 0.00002 dips and groove are far below a pixel; drawn before the 1 km move",
+  "check_stage": 3,
+  "expected": [
+   154845.13018241766,
+   154845.13018241766
+  ],
+  "volume": 154843.8905795971,
+  "rel_err": 8.005436264667048e-06,
+  "outside_rel": 8.005436264667048e-06
+ },
+ "acid-11": {
+  "image": "acid-11-sketch.png",
+  "stage": 6,
+  "note": "the parts at the start of the motion; the ring and cam are acid-1 and acid-2 at stage 3"
+ }
+}

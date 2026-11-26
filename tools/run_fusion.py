@@ -6,6 +6,8 @@ Fusion must be running with its MCP server on (FUSION_MCP, default http://127.0.
 Each stage is one script run in Fusion (fusion/acid.py); this side checks what it measured against
 expected/values.py, exactly as the FreeCAD harness does. Each test is a new, unsaved design: when it
 ends, it is exported as fusion/models/<test>.f3d on this machine (never saved to the cloud) and closed.
+When a test passes every stage, its finished output is also exported as STL to meshes/ (gitignored) and
+rendered by tools/render.py as docs/img/<test>-fusion-<version>.png, which the site shows beside the sketch.
 A stage that does not answer within --limit seconds is recorded as "hang" and the run stops, since
 Fusion is then still busy with it.
 """
@@ -22,6 +24,7 @@ sys.path.insert(0, os.path.join(ROOT, "expected"))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 import values  # noqa: E402
 from fusion_mcp import Client, ScriptError  # noqa: E402
+import render  # noqa: E402  (numpy is needed only to draw, and only once a test passes every stage)
 
 ALL = ["acid-%d" % i for i in range(1, 12)]
 LIB = open(os.path.join(ROOT, "fusion", "acid.py"), encoding="utf-8").read()
@@ -67,7 +70,10 @@ def check(test, stage, m, prev_volume):
 
 
 def run_test(c, test, out, limit, version, export):
+    passed = []
+
     def emit(rec):
+        passed.append(rec["outcome"] == "pass")
         rec.update(pipeline="fusion", version=version, test=test)
         with open(out, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec) + "\n")
@@ -99,6 +105,14 @@ def run_test(c, test, out, limit, version, export):
         bad += reply.get("problems", [])
         emit({"stage": n, "outcome": "pass" if not bad else "fail", "seconds": secs, "measured": m, "detail": "; ".join(bad)})
         prev = m["volume_mm3"]
+    if len(passed) == len(values.TESTS[test]) and all(passed):
+        mesh = os.path.join(render.MESHES, "%s-%s.stl" % (test, render.slug(version)))
+        os.makedirs(render.MESHES, exist_ok=True)
+        if os.path.exists(mesh):
+            os.remove(mesh)
+        c.script(script(test, 0, "stl", path=mesh), timeout=600)
+        if os.path.exists(mesh):
+            render.render_completion(test, version, [mesh])
     if export and (built or n > 1):
         path = os.path.join(ROOT, "fusion", "models", test + ".f3d")
         os.makedirs(os.path.dirname(path), exist_ok=True)
